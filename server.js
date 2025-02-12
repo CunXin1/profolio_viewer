@@ -1,31 +1,66 @@
 const express = require("express");
 const cors = require("cors");
-const mysql = require("mysql2/promise"); // 使用 promise 版的 mysql2
+const mysql = require("mysql2/promise");
 
 const app = express();
 const PORT = 3000;
-
 
 // 中间件
 app.use(cors());
 app.use(express.json());
 
-// 连接池设置（请修改为你的 MySQL 配置）
+// 数据库连接池 (请修改为你自己的配置信息)
 const pool = mysql.createPool({
-    host: "localhost",
-    user: "CunXin",
-    password: "QRB20031001notch",
-    database: "my_investment_db"
-  });
+  host: "localhost",
+  user: "CunXin",
+  password: "123",   
+  database: "my_investment_db", 
+  waitForConnections: true,
+  connectionLimit: 10
+});
+
+/** 
+ * POST /initDefault
+ * 初始化默认投资组合，金额全为 0，常见的 5 个或更多。
+ */
+app.post("/initDefault", async (req, res) => {
+  try {
+    // 先清空表
+    await pool.query("TRUNCATE TABLE portfolio");
+
+    // 想要哪些默认条目，可自行修改
+    const defaultItems = [
+      { name: "纳指",   amount: 0 },
+      { name: "美股",   amount: 0 },
+      { name: "黄金",   amount: 0 },
+      { name: "标普500", amount: 0 },
+      { name: "A股",    amount: 0 }
+    ];
+
+    // 插入默认条目（percentage 都先写 0）
+    for (let item of defaultItems) {
+      await pool.query(
+        "INSERT INTO portfolio (name, amount, percentage) VALUES (?, ?, 0)",
+        [item.name, item.amount]
+      );
+    }
+
+    // 返回成功
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Error in /initDefault:", err);
+    res.status(500).json({ error: "Database error." });
+  }
+});
 
 /**
  * GET /portfolio
- * 读取数据库中的所有投资信息，并返回
+ * 获取所有投资
  */
 app.get("/portfolio", async (req, res) => {
   try {
     const [rows] = await pool.query("SELECT * FROM portfolio");
-    res.json(rows); // 直接返回数组给前端
+    res.json(rows);
   } catch (err) {
     console.error("Error in GET /portfolio:", err);
     res.status(500).json({ error: "Database error." });
@@ -34,46 +69,70 @@ app.get("/portfolio", async (req, res) => {
 
 /**
  * POST /add
- * 添加新投资，并重新计算所有投资的 percentage
+ * 添加新投资
  * body: { name, amount }
  */
 app.post("/add", async (req, res) => {
   try {
     const { name, amount } = req.body;
-
-    // 基础校验
     if (!name || !amount || amount <= 0) {
       return res.status(400).json({ error: "请输入有效的投资名称和金额" });
     }
 
-    // 先计算当前总金额
+    // 先查一下当前总金额
     const [rows] = await pool.query("SELECT SUM(amount) as total FROM portfolio");
-    const totalAmountBefore = rows[0].total || 0; // 如果为空则为 0
-    const newTotalAmount = totalAmountBefore + amount;
+    const totalBefore = rows[0].total || 0;
+    const newTotal = totalBefore + amount;
 
-    // 1) 往数据库里插入这条新投资记录 (先插入, percentage 暂时随便写个 0)
+    // 插入新条目 (percentage 先置 0)
     await pool.query(
       "INSERT INTO portfolio (name, amount, percentage) VALUES (?, ?, 0)",
       [name, amount]
     );
 
-    // 2) 重新查询数据库, 拿到所有投资的 id 和 amount
+    // 重新获取全部条目，更新 percentage
     const [allItems] = await pool.query("SELECT id, amount FROM portfolio");
 
-    // 3) 重新计算所有记录的 percentage, 并更新
-    //    (老数据不变，amount 不变，但它们在新 totalAmount 中的占比会变)
     for (let item of allItems) {
-      const newPercentage = item.amount / newTotalAmount * 100;
-      await pool.query(
-        "UPDATE portfolio SET percentage = ? WHERE id = ?",
-        [newPercentage, item.id]
-      );
+      const percent = (newTotal === 0) ? 0 : (item.amount / newTotal) * 100;
+      await pool.query("UPDATE portfolio SET percentage = ? WHERE id = ?", [percent, item.id]);
     }
 
-    // 4) 返回成功
     res.json({ success: true });
   } catch (err) {
     console.error("Error in POST /add:", err);
+    res.status(500).json({ error: "Database error." });
+  }
+});
+
+/**
+ * POST /delete
+ * 删除指定 id 的投资
+ * body: { id }
+ */
+app.post("/delete", async (req, res) => {
+  try {
+    const { id } = req.body;
+    if (!id) {
+      return res.status(400).json({ error: "缺少 id 参数" });
+    }
+
+    // 先删除这条记录
+    await pool.query("DELETE FROM portfolio WHERE id = ?", [id]);
+
+    // 再重新计算剩余项目的 percentage
+    const [sumRows] = await pool.query("SELECT SUM(amount) as total FROM portfolio");
+    const total = sumRows[0].total || 0;
+
+    const [allItems] = await pool.query("SELECT id, amount FROM portfolio");
+    for (let item of allItems) {
+      const percent = (total === 0) ? 0 : (item.amount / total) * 100;
+      await pool.query("UPDATE portfolio SET percentage = ? WHERE id = ?", [percent, item.id]);
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Error in POST /delete:", err);
     res.status(500).json({ error: "Database error." });
   }
 });
