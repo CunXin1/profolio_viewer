@@ -1,0 +1,10 @@
+CREATE DATABASE IF NOT EXISTS my_investment_db;
+
+USE my_investment_db;
+
+CREATE TABLE IF NOT EXISTS portfolio (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  amount DECIMAL(14,2) NOT NULL DEFAULT 0,
+  percentage DECIMAL(6,2) NOT NULL DEFAULT 0
+);

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>投资组合可视化</title>
+
+  <!-- Chart.js & jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- 样式文件 -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>我的投资组合</h2>
+    <canvas id="portfolioChart"></canvas>
+
+    <!-- 切换金额/百分比视图 -->
+    <div>
+      <button onclick="toggleView()">切换金额/百分比</button>
+    </div>
+
+    <!-- 添加新投资 -->
+    <div>
+      <h3>添加新投资</h3>
+      <input type="text" id="newInvestmentName" placeholder="投资名称" />
+      <input type="number" id="newInvestmentAmount" placeholder="金额" />
+      <button onclick="addInvestment()">添加投资</button>
+    </div>
+  </div>
+
+  <!-- 脚本文件 -->
+  <script src="script.js"></script>
+</body>
+</html>
