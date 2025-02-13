@@ -12,7 +12,7 @@ function fetchPortfolio() {
     .catch(err => console.error("获取组合出错:", err));
 }
 
-// 2. 渲染饼图
+// 2. 渲染饼图  
 function renderChart(data) {
   const ctx = document.getElementById("portfolioChart").getContext("2d");
   if (chart) chart.destroy();
