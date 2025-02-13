@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2/promise"); // 使用 promise 版的 mysql2
@@ -10,10 +12,11 @@ app.use(express.json());
 
 // 数据库连接配置
 const pool = mysql.createPool({
-  host: "localhost",
-  user: "CunXin",
-  password: "QRB20031001notch",  
-  database: "my_investment_db", 
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT,          // 如果是默认3306，可以省略
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
