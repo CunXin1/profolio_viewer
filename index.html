@@ -5,31 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>投资组合可视化</title>
 
-  <!-- 样式文件 -->
-  <link rel="stylesheet" href="style.css" />
-
-  <!-- Chart.js & Plugin & jQuery -->
+  <!-- Chart.js & jQuery -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-  <!-- default.js: 负责初始化默认数据 -->
-  <script src="default.js"></script>
-  <!-- script.js: 主要逻辑（增、删、绘图、切换视图） -->
-  <script src="script.js"></script>
+  <!-- 样式文件 -->
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
     <h2>我的投资组合</h2>
-    <!-- 饼状图 -->
     <canvas id="portfolioChart"></canvas>
 
-    <!-- 切换金额 / 百分比 -->
+    <!-- 切换金额/百分比视图 -->
     <div>
       <button onclick="toggleView()">切换金额/百分比</button>
     </div>
 
-    <!-- 新增投资 -->
+    <!-- 添加新投资 -->
     <div>
       <h3>添加新投资</h3>
       <input type="text" id="newInvestmentName" placeholder="投资名称" />
@@ -37,23 +30,31 @@
       <button onclick="addInvestment()">添加投资</button>
     </div>
 
-    <!-- 列表 + 删除按钮 -->
+    <!-- 清空数据库（不再确认） -->
     <div>
-      <h3>现有投资项目</h3>
-      <table id="investmentList" border="1" style="margin:0 auto;">
+      <h3>清空所有投资数据</h3>
+      <button onclick="clearAll()">清空数据库</button>
+    </div>
+
+    <!-- 如果要表格展示，可以加一个表格区域 -->
+    <div style="margin-top:30px;">
+      <h3>投资组合明细</h3>
+      <table id="portfolioTable" border="1" style="margin:0 auto;">
         <thead>
           <tr>
-            <th>名称</th>
-            <th>金额</th>
-            <th>百分比</th>
-            <th>操作</th>
+            <th>投资名称</th>
+            <th>投资金额</th>
+            <th>持仓占比</th>
           </tr>
         </thead>
         <tbody>
-          <!-- 动态插入 -->
+          <!-- 通过脚本填充 -->
         </tbody>
       </table>
     </div>
   </div>
+
+  <!-- 前端脚本 -->
+  <script src="script.js"></script>
 </body>
 </html>

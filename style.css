@@ -1,27 +1,31 @@
 body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-  }
-  
-  .container {
-    width: 60%;
-    margin: auto;
-    padding: 20px;
-  }
-  
-  input, button {
-    margin: 5px;
-    padding: 8px;
-  }
-  
-  table {
-    border-collapse: collapse;
-    margin-top: 10px;
-    width: 80%;
-  }
-  
-  th, td {
-    padding: 8px;
-    text-align: center;
-  }
-  
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+.container {
+  width: 50%;
+  margin: auto;
+  padding: 20px;
+}
+
+input, button {
+  margin: 5px;
+  padding: 8px;
+}
+
+/* 表格简单美化 */
+#portfolioTable {
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+#portfolioTable th,
+#portfolioTable td {
+  padding: 8px 12px;
+  text-align: center;
+}
+
+#portfolioTable thead {
+  background-color: #f2f2f2;
+}
